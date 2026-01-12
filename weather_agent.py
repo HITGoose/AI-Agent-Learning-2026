@@ -24,6 +24,7 @@ def get_weather(location):
         return json.dumps({"location": location, "temperature": "unknown"})
 
 # 3. 告诉 AI 它有哪些工具可用 (工具说明书)
+#这是一个固定格式，openai的标准格式，如将查股票只需将get_weather改为get_stock，description改为获取某个股票的当前价格，parameters改为获取某个股票的代码
 tools_schema = [
     {
         "type": "function",
@@ -43,8 +44,8 @@ tools_schema = [
         }
     }
 ]
-
-# 4. 主程序：发送问题给 AI
+#以上均为固定格式
+# 4. 主程序：发送问题给 AI（这是第一步，将用户的问题发送给AI）
 def run_agent():
     # 用户的问题
     user_query = "上海今天出门需要带伞吗？"
@@ -62,7 +63,7 @@ def run_agent():
     # 获取 AI 的第一轮回复 (它应该会说：我想调用函数！)
     ai_msg = response.choices[0].message
     
-    # 5. 检查 AI 是否想要使用工具
+    # 5. 检查 AI 是否想要使用工具（这是第二步，判断AI是否需要使用工具）
     if ai_msg.tool_calls:
         print("🤖 Agent 思考: 我不知道答案，但我决定使用工具 'get_weather'！")
         
@@ -73,19 +74,19 @@ def run_agent():
         function_args = json.loads(tool_call.function.arguments)
         location_arg = function_args.get("location")
 
-        # 6. 执行函数 (真正的“动手”环节)
+        # 6. 执行函数 (这是第三步，执行工具函数，他说他想用weather工具，则执行get_weather函数)
         if function_name == "get_weather":
             tool_result = get_weather(location_arg)
             print(f"✅ 工具返回结果: {tool_result}")
 
             # 7. 把工具查到的结果，回传给 AI (闭环)
-            # 我们要把这个结果加到对话历史里，假装是工具告诉它的
-            messages.append(ai_msg) # 把 AI 刚才的思考加进去
+            # 这两个代码必须加
+            messages.append(ai_msg) # 把 AI 刚才的思考加进去（不加这个，AI会不知道之前它已经想好了用weather工具）
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
                 "content": tool_result
-            })
+            })#不加这个，AI会不知道工具返回的结果 所以这两行代码必须加
 
             # 8. 第二次呼叫：AI 拿到数据后，组织语言回答用户
             final_response = client.chat.completions.create(

@@ -17,15 +17,15 @@ def get_weather(location):
     
     try:
         # 这里我们使用 wttr.in 这个免费的天气服务
-        # format=3 表示返回一种超简洁的文本格式 (例如：Beijing: ☀️ +25°C)
+        #1.要去哪里 # format=3 表示返回一种超简洁的文本格式 (例如：Beijing: ☀️ +25°C)
         url = f"https://wttr.in/{location}?format=3"
         
-        # 发送网络请求 (相当于 Python 替你打开了浏览器)
+        #2.怎么去 # 发送网络请求 (相当于 Python 替你打开了浏览器)
         response = requests.get(url)
         
-        # 检查是否成功 (状态码 200 表示网页正常打开)
+        #3.拿到数据了没 # 检查是否成功 (状态码 200 表示网页正常打开)
         if response.status_code == 200:
-            weather_data = response.text.strip() # 拿到网页里的文字
+            weather_data = response.text.strip() # 拿到网页里的文字 #加strip()是为了去掉网页里的空格和换行符
             return weather_data
         else:
             return f"查询失败，网络状态码: {response.status_code}"
